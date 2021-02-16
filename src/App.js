@@ -7,11 +7,22 @@ function App() {
   const [tasks, setTasks] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [id, setId] = useState("");
+  const [error, setError] = useState(null);
+
+ const validForm = () =>{
+   let isValid = true;
+   setError(null);
+    if (isEmpty(task)){
+    setError("Debes ingresar una tarea")
+    isValid=false;
+    }
+    return isValid;
+ }
+
   const addTask = (e) => {
     e.preventDefault();
-    if (isEmpty(task)){
-        console.log("Task empty");
-        return;
+    if(!validForm()){
+      return;
     }
 
     const newTask = {
@@ -23,8 +34,8 @@ function App() {
     setTask("");
   }
     const deleteTask =(id) => {
-      setEditMode(true);
-      setId(id);
+      const filteredTask = tasks.filter(task => task.id !== id);
+      setTasks(filteredTask);
     }
 
     const editTask =(theTask) => {
@@ -35,9 +46,8 @@ function App() {
 
     const saveTask = (e) => {
       e.preventDefault();
-      if (isEmpty(task)){
-          console.log("Task empty");
-          return;
+      if(!validForm()){
+        return;
       }
       const editedTasks = tasks.map(item => item.id === id ?{ id, name: task}: item)
       setTasks(editedTasks);
@@ -55,10 +65,12 @@ function App() {
           <h4 className="text-center">Lista de Tareas</h4>       
           {
             size(tasks)==0 ? (
-              <h5 className="text-center">No hay tareas.</h5>
+              <ul className="list-group">
+              <li className="List-group-item">No hay tareas.</li>
+              </ul>
             ) :
             (
-            <ul className="list-grouo">
+            <ul className="list-group">
             {
               tasks.map((task) => (
                 <li className="list-group-item" key={task.id}>
@@ -83,13 +95,16 @@ function App() {
             {editMode ? "Editar Tarea" : "Agregar Tarea"}
             </h4>
           <form onSubmit={editMode ? saveTask :addTask}>
+              {
+               error && <span className="text-danger">{error}</span>
+              }
             <input
              type="text"
              className="form-control mb-2"
              placeholder="Ingresa la tarea"
              onChange={(text) => setTask(text.target.value)}
              value={task}
-            />
+            />          
             <button 
             className={editMode ? "btn btn-warning btn-block":"btn btn-dark btn-block" }
             type="submit">
